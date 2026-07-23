@@ -135,12 +135,14 @@ create trigger trg_bookings_updated before update on bookings
 -- ---------- Auto-create profile on signup ----------
 
 create or replace function handle_new_user()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer
+set search_path = public
+as $$
 declare
   staff_role_id uuid;
 begin
-  select id into staff_role_id from roles where name = 'Staff' limit 1;
-  insert into profiles (id, username, first_name, surname, role_id, status)
+  select id into staff_role_id from public.roles where name = 'Staff' limit 1;
+  insert into public.profiles (id, username, first_name, surname, role_id, status)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'username', split_part(new.email,'@',1)),

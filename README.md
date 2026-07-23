@@ -79,14 +79,28 @@ git push -u origin main
    - `VITE_SUPABASE_ANON_KEY`
 4. Deploy.
 
+## 6. Enable "Add user" (admin-created accounts)
+
+Staff can still sign up themselves, but Admins/Transport Officers can also
+create accounts directly from **User Accounts → + Add user**. This calls a
+Supabase Edge Function (`supabase/functions/create-user`) that uses the
+service-role key server-side — the key itself never touches the browser.
+
+To deploy it:
+
+1. In the Supabase dashboard, go to **Edge Functions → Create a new function**.
+2. Name it exactly `create-user`.
+3. Paste in the contents of [`supabase/functions/create-user/index.ts`](./supabase/functions/create-user/index.ts).
+4. Deploy. `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`
+   are injected automatically — no secrets to configure.
+
+That's it — the **+ Add user** button in the app will start working
+immediately, no redeploy of the frontend needed. Only accounts with a
+`can_manage` role (Admin, Transport Officer) are allowed to call it; the
+function checks this itself, independent of the app's UI.
+
 ## Notes
 
-- Auth uses Supabase's own email/password sign-up — there's no separate
-  admin-created-user flow, since that requires a service-role key which
-  should never live in a browser bundle. If you'd rather have the Transport
-  Office create accounts directly (instead of self sign-up), that needs a
-  small server-side function (e.g. a Supabase Edge Function) using the
-  service-role key — happy to add that next if you want it.
 - Departments/Sections/Locations seed empty — add your college's real
   faculties, offices, and campuses from the **Location Configurations**
   screens after first login.
